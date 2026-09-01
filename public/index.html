@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mint by OMNI | Digital Product Passport</title>
+    <style>
+        :root { --bg: #0f172a; --card: #1e293b; --accent: #38bdf8; --text: #f8fafc; --muted: #94a3b8; }
+        body { font-family: system-ui, -apple-system, sans-serif; background: var(--bg); color: var(--text); margin: 0; padding: 2rem; display: flex; justify-content: center; }
+        .container { width: 100%; max-width: 600px; background: var(--card); padding: 2rem; border-radius: 12px; box-shadow: 0 4px 20px rgba(0,0,0,0.3); }
+        h1 { font-size: 1.5rem; margin-bottom: 0.5rem; color: var(--accent); }
+        p { color: var(--muted); font-size: 0.9rem; margin-bottom: 1.5rem; }
+        .input-group { display: flex; gap: 0.5rem; margin-bottom: 1.5rem; }
+        input { flex: 1; padding: 0.75rem; border-radius: 6px; border: 1px solid #334155; background: #0f172a; color: var(--text); font-size: 1rem; }
+        button { background: var(--accent); color: var(--bg); border: none; padding: 0.75rem 1.5rem; border-radius: 6px; font-weight: bold; cursor: pointer; }
+        button:hover { opacity: 0.9; }
+        .result { background: #0f172a; padding: 1rem; border-radius: 6px; border: 1px solid #334155; font-family: monospace; white-space: pre-wrap; font-size: 0.85rem; display: none; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Mint by OMNI</h1>
+        <p>Digital Product Passport & Supply Chain Provenance Verification</p>
+        <div class="input-group">
+            <input type="text" id="tokenInput" placeholder="Enter Secure Access Token">
+            <button onclick="verifyToken()">Verify Token</button>
+        </div>
+        <div id="resultBox" class="result"></div>
+    </div>
+    <script>
+        async function verifyToken() {
+            const token = document.getElementById('tokenInput').value.trim();
+            const resultBox = document.getElementById('resultBox');
+            if (!token) return;
+            resultBox.style.display = 'block';
+            resultBox.textContent = 'Verifying security token...';
+            try {
+                const response = await fetch(`/api/token/verify`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ token, batchId: "OMNI-BATCH-001" })
+                });
+                const data = await response.json();
+                resultBox.textContent = JSON.stringify(data, null, 2);
+            } catch (err) {
+                resultBox.textContent = 'Error connecting to data layer: ' + err.message;
+            }
+        }
+    </script>
+</body>
+</html>
