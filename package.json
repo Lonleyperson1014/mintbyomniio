@@ -1,0 +1,14 @@
+{
+  "name": "mint-by-omni-dpp",
+  "version": "1.0.0-PROD",
+  "description": "Enterprise Digital Product Passport & Provenance Platform",
+  "main": "index.js",
+  "scripts": {
+    "build": "echo 'Building static assets...'",
+    "start": "netlify dev"
+  },
+  "dependencies": {
+    "express": "^4.19.2",
+    "serverless-http": "^3.2.0"
+  }
+}
