@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Mint by OMNI - Trade Bulk Test</title>
+</head>
+<body style="font-family: sans-serif; text-align: center; padding-top: 50px;">
+    <h2>Carifika MOU Trade Bulk Test</h2>
+    <button id="testBtn" style="padding: 12px 24px; font-size: 16px; background: #000; color: #fff; border: none; border-radius: 6px;">Test Submission</button>
+    <pre id="output" style="margin-top: 20px; text-align: left; display: inline-block; background: #f4f4f4; padding: 15px; border-radius: 5px;"></pre>
+
+    <script>
+      document.getElementById('testBtn').addEventListener('click', async () => {
+        const output = document.getElementById('output');
+        output.textContent = "Submitting trade record...";
+
+        const testPayload = {
+          contract_ref: "CARIFIKA-MOU-2026-001",
+          hs_code: "1516.20",
+          commodity: "FAME B100 Biodiesel",
+          quantity: 50000,
+          load_port: "Durban Port",
+          discharge_port: "Walvis Bay",
+          trade_corridor: "Southern Africa Trade Corridor",
+          afcfta_status: "Compliant",
+          pipeline_stage: "Verification"
+        };
+
+        try {
+          const response = await fetch('/.netlify/functions/trade_bulk', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(testPayload)
+          });
+          const result = await response.json();
+          output.textContent = JSON.stringify(result, null, 2);
+        } catch (err) {
+          output.textContent = "Error: " + err.message;
+        }
+      });
+    </script>
+</body>
+</html>
