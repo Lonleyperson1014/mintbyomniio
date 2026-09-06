@@ -1,43 +1,50 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <title>Mint by OMNI - Trade Bulk Test</title>
+  <meta charset="UTF-8">
+  <title>Mint by OMNI - Direct Supabase Test</title>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 </head>
-<body style="font-family: sans-serif; text-align: center; padding-top: 50px;">
-    <h2>Carifika MOU Trade Bulk Test</h2>
-    <button id="testBtn" style="padding: 12px 24px; font-size: 16px; background: #000; color: #fff; border: none; border-radius: 6px;">Test Submission</button>
-    <pre id="output" style="margin-top: 20px; text-align: left; display: inline-block; background: #f4f4f4; padding: 15px; border-radius: 5px;"></pre>
+<body style="font-family: sans-serif; text-align: center; padding-top: 50px; background: #000; color: #fff;">
+  <h2>Direct Supabase Trade Test</h2>
+  <button id="testBtn" style="padding: 12px 24px; font-size: 14px; background: #222; color: #fff; border: 1px solid #444; cursor: pointer;">Test Direct Insert</button>
+  <br><br>
+  <pre id="output" style="text-align: left; display: inline-block; background: #111; padding: 15px; border-radius: 5px; color: #0f0; max-width: 600px; white-space: pre-wrap;"></pre>
+  
+  <script>
+    // Paste your Supabase project URL and public anon key here
+    const SUPABASE_URL = 'YOUR_SUPABASE_URL';
+    const SUPABASE_KEY = 'YOUR_SUPABASE_ANON_KEY';
+    
+    const client = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
-    <script>
-      document.getElementById('testBtn').addEventListener('click', async () => {
-        const output = document.getElementById('output');
-        output.textContent = "Submitting trade record...";
+    document.getElementById('testBtn').addEventListener('click', async () => {
+      const output = document.getElementById('output');
+      output.textContent = 'Inserting record directly into Supabase...';
 
-        const testPayload = {
-          contract_ref: "CARIFIKA-MOU-2026-001",
-          hs_code: "1516.20",
-          commodity: "FAME B100 Biodiesel",
-          quantity: 50000,
-          load_port: "Durban Port",
-          discharge_port: "Walvis Bay",
-          trade_corridor: "Southern Africa Trade Corridor",
-          afcfta_status: "Compliant",
-          pipeline_stage: "Verification"
-        };
+      try {
+        const { data, error } = await client
+          .from('trade_bulk_pos')
+          .insert([{
+            contract_ref: 'CARIFIKA-MOU-2026-001',
+            hs_code: '1516.20',
+            commodity: 'FAME B100 Biodiesel',
+            quantity: 50000,
+            load_port: 'Durban Port',
+            discharge_port: 'Walvis Bay',
+            trade_corridor: 'Southern Africa Trade Corridor',
+            afcfta_status: 'Compliant',
+            pipeline_stage: 'Verification'
+          }])
+          .select();
 
-        try {
-          const response = await fetch('/.netlify/functions/trade_bulk', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(testPayload)
-          });
-          const result = await response.json();
-          output.textContent = JSON.stringify(result, null, 2);
-        } catch (err) {
-          output.textContent = "Error: " + err.message;
-        }
-      });
-    </script>
+        if (error) throw error;
+
+        output.textContent = 'Success! Row inserted:\n' + JSON.stringify(data, null, 2);
+      } catch (err) {
+        output.textContent = 'Error: ' + err.message;
+      }
+    });
+  </script>
 </body>
 </html>
