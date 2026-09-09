@@ -1,27 +1,60 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
+  <meta charset="utf-8">
   <title>Trade Bulk Positions Test</title>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <style>
+    body { font-family: system-ui, sans-serif; background: #0f172a; color: #f8fafc; margin: 0; padding: 2rem; }
+    .container { max-width: 600px; margin: auto; }
+    input, button { padding: 0.75rem; border-radius: 6px; border: 1px solid #334155; background: #1e293b; color: #f8fafc; margin-bottom: 1rem; width: 100%; box-sizing: border-box; }
+    button { background: #38bdf8; color: #0f172a; font-weight: bold; cursor: pointer; }
+    button:hover { opacity: 0.9; }
+    pre { background: #1e293b; padding: 1rem; border-radius: 6px; border: 1px solid #334155; white-space: pre-wrap; font-size: 0.85rem; }
+  </style>
 </head>
 <body>
-  <h1>Trade Bulk Positions</h1>
+  <div class="container">
+    <h1>Trade Bulk Positions Test</h1>
 
-  <!-- Insert Form -->
-  <form id="insertForm" style="margin-bottom: 20px;">
-    <input type="text" id="itemName" placeholder="Item Name" required />
-    <input type="number" id="itemQty" placeholder="Quantity" required />
-    <button type="submit">Add Record</button>
-  </form>
+    <!-- Token Generator Section -->
+    <div style="margin-bottom: 2rem; padding: 1rem; background: #1e293b; border-radius: 8px; border: 1px solid #334155;">
+      <h3>Generate Secure Token</h3>
+      <button onclick="generateToken()">Generate Live Token</button>
+      <pre id="tokenResult" style="display: none;"></pre>
+    </div>
 
-  <div id="results"></div>
+    <!-- Insert Form -->
+    <form id="insertForm" style="margin-bottom: 20px;">
+      <input type="text" id="itemName" placeholder="Item Name" required />
+      <input type="number" id="itemQty" placeholder="Quantity" required />
+      <button type="submit">Add Record</button>
+    </form>
+
+    <div id="results"></div>
+  </div>
 
   <script>
     const SUPABASE_URL = 'https://kgwwuwqtxqlpmdsyxfci.supabase.co';
-    const SUPABASE_ANON_KEY = 'sb_publishable_mQicwHup1pa2UAJLy9X0cA_VJy_nZEV';
-
+    const SUPABASE_ANON_KEY = 'sb_publishable_m1cwHap1pa2UKJy9XOc4_VJy_nZEV';
     const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+    async function generateToken() {
+      const tokenBox = document.getElementById('tokenResult');
+      tokenBox.style.display = 'block';
+      tokenBox.textContent = 'Generating token...';
+      try {
+        const response = await fetch('/api/token/generate', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ batchid: 'OMNI-BATCH-001' })
+        });
+        const data = await response.json();
+        tokenBox.textContent = JSON.stringify(data, null, 2);
+      } catch (err) {
+        tokenBox.textContent = 'Error generating token: ' + err.message;
+      }
+    }
 
     async function fetchTradeBulkPositions() {
       const { data, error } = await supabase
