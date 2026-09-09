@@ -3,11 +3,18 @@
 <head>
   <meta charset="UTF-8">
   <title>Trade Bulk Positions Test</title>
-  <!-- Load Supabase JS CDN -->
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 </head>
 <body>
   <h1>Trade Bulk Positions</h1>
+
+  <!-- Insert Form -->
+  <form id="insertForm" style="margin-bottom: 20px;">
+    <input type="text" id="itemName" placeholder="Item Name" required />
+    <input type="number" id="itemQty" placeholder="Quantity" required />
+    <button type="submit">Add Record</button>
+  </form>
+
   <div id="results"></div>
 
   <script>
@@ -27,9 +34,28 @@
         return;
       }
 
-      console.log('Fetched positions:', data);
-      document.getElementById('results').innerHTML = JSON.stringify(data, null, 2);
+      document.getElementById('results').innerHTML = '<pre>' + JSON.stringify(data, null, 2) + '</pre>';
     }
+
+    document.getElementById('insertForm').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const name = document.getElementById('itemName').value;
+      const qty = document.getElementById('itemQty').value;
+
+      const { data, error } = await supabase
+        .from('trade_bulk_pos')
+        .insert([{ item_name: name, quantity: Number(qty) }]);
+
+      if (error) {
+        console.error('Error inserting record:', error);
+        alert('Failed to insert record: ' + error.message);
+        return;
+      }
+
+      document.getElementById('itemName').value = '';
+      document.getElementById('itemQty').value = '';
+      fetchTradeBulkPositions();
+    });
 
     fetchTradeBulkPositions();
   </script>
