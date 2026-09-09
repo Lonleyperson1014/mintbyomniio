@@ -1,10 +1,12 @@
 const { createClient } = require('@supabase/supabase-js');
 const crypto = require('crypto');
 
-const supabase = createClient(process.env.SUPABASE_URL, process.env.SUPABASE_ANON_KEY);
+const supabase = createClient(
+  process.env.VITE_SUPABASE_URL, 
+  process.env.VITE_SUPABASE_PUBLISHABLE_KEY
+);
 
 exports.handler = async function(event) {
-  // Handle CORS preflight or non-POST requests if needed
   if (event.httpMethod !== 'POST') {
     return { statusCode: 405, body: "Method Not Allowed" };
   }
