@@ -1,20 +1,57 @@
-<button id="generate-btn" style="background:#3b82f6; color:#fff; padding:10px 16px; border:none; border-radius:6px; cursor:pointer; margin-bottom:10px;">
-  Generate Live Token
-</button>
-<input type="text" id="token-output" readonly placeholder="Generated token will appear here" style="width:100%; padding:8px; background:#1e293b; color:#fff; border:1px solid #334155; border-radius:4px;" />
-
-<script>
-  document.getElementById('generate-btn').addEventListener('click', async () => {
-    try {
-      const response = await fetch('/api/token/generate', { method: 'POST' });
-      const data = await response.json();
-      if (data.token) {
-        document.getElementById('token-output').value = data.token;
-      } else {
-        alert('Error: ' + (data.error || 'Could not generate token'));
-      }
-    } catch (err) {
-      alert('Network error connecting to function.');
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Mint by OMNI</title>
+  <style>
+    body {
+      background-color: #0f172a;
+      color: #f8fafc;
+      font-family: system-ui, -apple-system, sans-serif;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      min-height: 100vh;
+      margin: 0;
+      padding: 20px;
     }
-  });
-</script>
+    .card {
+      background: #1e293b;
+      padding: 24px;
+      border-radius: 12px;
+      width: 100%;
+      max-width: 400px;
+      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
+    }
+  </style>
+</head>
+<body>
+  <div class="card">
+    <h2>Mint by OMNI</h2>
+    <p>Digital Product Passport & Supply Chain Verification</p>
+    
+    <button id="generate-btn" style="width:100%; background:#3b82f6; color:#fff; padding:12px; border:none; border-radius:6px; cursor:pointer; font-weight:600; margin-bottom:12px;">
+      Generate Live Token
+    </button>
+    <input type="text" id="token-output" readonly placeholder="Generated token will appear here" style="width:100%; box-sizing:border-box; padding:10px; background:#0f172a; color:#fff; border:1px solid #334155; border-radius:6px;" />
+  </div>
+
+  <script>
+    document.getElementById('generate-btn').addEventListener('click', async () => {
+      try {
+        const response = await fetch('/api/token/generate', { method: 'POST' });
+        const data = await response.json();
+        if (data.token) {
+          document.getElementById('token-output').value = data.token;
+        } else {
+          alert('Error: ' + (data.error || 'Could not generate token'));
+        }
+      } catch (err) {
+        alert('Network error connecting to function.');
+      }
+    });
+  </script>
+</body>
+</html>
