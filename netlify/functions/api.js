@@ -14,8 +14,9 @@ exports.handler = async function(event) {
   try {
     const token = crypto.randomBytes(32).toString('hex');
     const expiresAt = Date.now() + 10 * 60 * 1000;
+    const batchid = 'batch-' + Date.now();
 
-    const { error } = await supabase.from('tokens').insert([{ token, expires_at: expiresAt }]);
+    const { error } = await supabase.from('tokens').insert([{ token, expires_at: expiresAt, batchid }]);
     
     if (error) {
       return { statusCode: 500, body: JSON.stringify({ error: error.message }) };
