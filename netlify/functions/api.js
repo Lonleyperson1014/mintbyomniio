@@ -1,65 +1,82 @@
 const express = require('express');
 const serverless = require('serverless-http');
 const crypto = require('crypto');
+const { createClient } = require('@supabase/supabase-js');
 
 const app = express();
 app.use(express.json());
 
-const tokenStore = new Map();
+// Initialize Supabase client using environment variables
+const supabase = createClient(
+  process.env.VITE_SUPABASE_URL || process.env.SUPABASE_URL,
+  process.env.VITE_SUPABASE_PUBLISHABLE_KEY || process.env.SUPABASE_ANON_KEY
+);
 
 function generateSecureToken() {
-    const token = crypto.randomBytes(32).toString('hex');
-    const expiresAt = Date.now() + 10 * 60 * 1000;
-    return { token, expiresAt };
+  const token = crypto.randomBytes(32).toString('hex');
+  const expiresAt = Date.now() + 10 * 60 * 1000;
+  return { token, expiresAt };
 }
 
-function verifyToken(storedTokenData, suppliedToken) {
-    if (!storedTokenData) return { valid: false, reason: "Token not found" };
-    if (Date.now() > storedTokenData.expiresAt) {
-        tokenStore.delete(suppliedToken);
-        return { valid: false, reason: "Token expired" };
-    }
-    try {
-        const isValid = crypto.timingSafeEqual(
-            Buffer.from(storedTokenData.token, 'hex'),
-            Buffer.from(suppliedToken, 'hex')
-        );
-        return { valid: isValid, reason: isValid ? "Success" : "Invalid token" };
-    } catch (err) {
-        return { valid: false, reason: "Malformed token format" };
-    }
-}
-
-const sample = generateSecureToken();
-tokenStore.set(sample.token, { ...sample, batchId: "OMNI-BATCH-001" });
-
-app.post('/api/token/generate', (req, res) => {
-    const { batchId } = req.body;
+app.post('/api/token/generate', async (req, res) => {
+  try {
+    const { batchid = 'OMNI-BATCH-001' } = req.body || {};
     const { token, expiresAt } = generateSecureToken();
-    tokenStore.set(token, { token, expiresAt, batchId });
-    res.json({ success: true, protocol: "Mint by OMNI DPP", token, expiresAt });
+
+    const { error } = await supabase
+      .from('tokens')
+      .insert([{ token, batchid, expires_at: expiresAt }]);
+
+    if (error) throw error;
+
+    res.json({
+      success: true,
+      protocol: 'Mint by OMNI DPP',
+      token,
+      expiresAt
+    });
+  } catch (err) {
+    res.status(500).json({ success: false, error: err.message });
+  }
 });
 
-app.post('/api/token/verify', (req, res) => {
-    const { token, batchId } = req.body;
-    const storedData = tokenStore.get(token);
-    const verification = verifyToken(storedData, token);
+app.post('/api/token/verify', async (req, res) => {
+  try {
+    const { token, batchid = 'OMNI-BATCH-001' } = req.body;
 
-    if (!verification.valid) {
-        return res.status(401).json({ success: false, error: verification.reason });
+    if (!token) {
+      return res.status(400).json({ success: false, error: 'Token is required' });
+    }
+
+    // Query Supabase for the token
+    const { data, error } = await supabase
+      .from('tokens')
+      .select('*')
+      .eq('token', token)
+      .single();
+
+    if (error || !data) {
+      return res.status(401).json({ success: false, error: 'Token not found' });
+    }
+
+    if (Date.now() > data.expires_at) {
+      return res.status(401).json({ success: false, error: 'Token expired' });
     }
 
     res.json({
-        success: true,
-        protocol: "Carifika Exchange / Data Layer Integration",
-        batchId: storedData.batchId || batchId,
-        status: "Verified",
-        provenance: {
-            origin: "Mogoditshane Bio-Refinery / Digital Asset Lab",
-            compliance: "EN 14214 / IoT Tracked",
-            exchangeSync: "Active"
-        }
+      success: true,
+      protocol: 'Carifika Exchange / Data Layer Integration',
+      batchid: data.batchid || batchid,
+      status: 'Verified',
+      provenance: {
+        origin: 'Mogoditshane Bio-Refinery / Digital Asset Lab',
+        compliance: 'EN 14214 / IoT Tracked',
+        exchangeSync: 'Active'
+      }
     });
+  } catch (err) {
+    res.status(500).json({ success: false, error: err.message });
+  }
 });
 
 module.exports.handler = serverless(app);
