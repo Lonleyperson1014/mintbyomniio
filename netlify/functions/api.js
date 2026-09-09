@@ -13,7 +13,7 @@ exports.handler = async function(event) {
 
   try {
     const token = crypto.randomBytes(32).toString('hex');
-    const expiresAt = new Date(Date.now() + 10 * 60 * 1000).toISOString();
+    const expiresAt = Date.now() + 10 * 60 * 1000;
 
     const { error } = await supabase.from('tokens').insert([{ token, expires_at: expiresAt }]);
     
