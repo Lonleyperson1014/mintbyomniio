@@ -1,49 +1,20 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <title>Mint by OMNI - Direct Supabase Test</title>
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-</head>
-<body style="font-family: sans-serif; text-align: center; padding-top: 50px; background: #000; color: #fff;">
-  <h2>Direct Supabase Trade Test</h2>
-  <button id="testBtn" style="padding: 12px 24px; font-size: 14px; background: #222; color: #fff; border: 1px solid #444; cursor: pointer;">Test Direct Insert</button>
-  <br><br>
-  <pre id="output" style="text-align: left; display: inline-block; background: #111; padding: 15px; border-radius: 5px; color: #0f0; max-width: 600px; white-space: pre-wrap;"></pre>
-  
-  <script>
-    const SUPABASE_URL = 'https://kgwwuwqtxqlpdsyxxfcl.supabase.co';
-    const SUPABASE_KEY = 'sb_publishable_mQicwHup1pa2UAJLy9X0cA_VJy_nZEV';
-    
-    const client = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+import { createClient } from '@supabase/supabase-js'
 
-    document.getElementById('testBtn').addEventListener('click', async () => {
-      const output = document.getElementById('output');
-      output.textContent = 'Inserting record directly into Supabase...';
+const supabase = createClient('YOUR_SUPABASE_URL', 'YOUR_SUPABASE_ANON_KEY')
 
-      try {
-        const { data, error } = await client
-          .from('trade_bulk_pos')
-          .insert([{
-            contract_ref: 'CARIFIKA-MOU-2026-001',
-            hs_code: '1516.20',
-            commodity: 'FAME B100 Biodiesel',
-            quantity: 50000,
-            load_port: 'Durban Port',
-            discharge_port: 'Walvis Bay',
-            trade_corridor: 'Southern Africa Trade Corridor',
-            afcfta_status: 'Compliant',
-            pipeline_stage: 'Verification'
-          }])
-          .select();
+async function fetchTradeBulkPositions() {
+  const { data, error } = await supabase
+    .from('trade_bulk_pos')
+    .select('*')
+    .order('id', { ascending: false });
 
-        if (error) throw error;
+  if (error) {
+    console.error('Error fetching records:', error);
+    return;
+  }
 
-        output.textContent = 'Success! Row inserted:\n' + JSON.stringify(data, null, 2);
-      } catch (err) {
-        output.textContent = 'Error: ' + err.message;
-      }
-    });
-  </script>
-</body>
-</html>
+  // Render rows into an HTML table or list
+  console.log('Fetched positions:', data);
+}
+
+fetchTradeBulkPositions();
