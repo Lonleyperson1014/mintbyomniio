@@ -1,6 +1,4 @@
-Here is a clean, professional `README.md` template tailored for your technical lead, Ibrahim Garba, covering your stack, repository architecture, and setup instructions. You can copy this directly and commit it to your GitHub repository.
 
----
 
 # Mint by OMNI - Technical Handover & README
 
